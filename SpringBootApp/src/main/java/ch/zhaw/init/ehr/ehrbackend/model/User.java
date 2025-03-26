@@ -1,5 +1,7 @@
 package ch.zhaw.init.ehr.ehrbackend.model;
 
+import java.util.Set;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,4 +24,5 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
+
 }
