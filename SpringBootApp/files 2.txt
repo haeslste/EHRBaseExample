@@ -14,7 +14,6 @@ server.port=8085
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 logging.level.org.springframework.boot=DEBUG
-logging.level.ch.zhaw.init.ehr.ehrbackend=DEBUG
 logging.level.ch.zhaw=DEBUG
 
 logging.level.org.hibernate.SQL=DEBUG
@@ -95,7 +94,6 @@ server.port=8085
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 logging.level.org.springframework.boot=DEBUG
-logging.level.ch.zhaw.init.ehr.ehrbackend=DEBUG
 logging.level.ch.zhaw=DEBUG
 
 logging.level.org.hibernate.SQL=DEBUG
@@ -116,29 +114,6 @@ default.admin.username=admin
 default.admin.password=adminpass
 default.superuser.username=superuser
 default.superuser.password=superpass
-
-===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/dto/LoginRequest.java =====
-package ch.zhaw.init.ehr.ehrbackend.dto;
-
-public class LoginRequest {
-    public String username;
-    public String password;
-}
-
-
-===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/dto/LoginResponse.java =====
-package ch.zhaw.init.ehr.ehrbackend.dto;
-
-public class LoginResponse {
-    public String token;
-    public String role;
-
-    public LoginResponse(String token, String role) {
-        this.token = token;
-        this.role = role;
-    }
-}
-
 
 ===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/repository/DoctorRepository.java =====
 package ch.zhaw.init.ehr.ehrbackend.repository;
@@ -186,90 +161,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PatientRepository extends JpaRepository<Patient, Long> {
 }
 
-===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/config/SecurityConfig.java =====
-package ch.zhaw.init.ehr.ehrbackend.config;
-
-import ch.zhaw.init.ehr.ehrbackend.service.UserService;
-
-import java.util.List;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-@Configuration
-@EnableWebSecurity
-@EnableMethodSecurity
-public class SecurityConfig {
-
-    private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
-
-    public SecurityConfig(UserService userService, PasswordEncoder passwordEncoder) {
-        this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userService);
-        provider.setPasswordEncoder(passwordEncoder);
-        return provider;
-    }
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless API
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPERUSER")
-                .requestMatchers("/superuser/**").hasRole("SUPERUSER")
-                .requestMatchers("/doctor/**").hasRole("DOCTOR")
-                .requestMatchers("/patient/**").hasRole("PATIENT")
-                .requestMatchers("/public/**", "/login").permitAll()
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Statelessor debug
-            .formLogin(AbstractHttpConfigurer::disable); 
-
-        return http.build();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // allow frontend
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true); // <-- also needed if you're using cookies
-    
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-}
-
-===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/config/DataInitializer.java =====
-package ch.zhaw.init.ehr.ehrbackend.config;
+===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/DataInitializer.java =====
+package ch.zhaw.init.ehr.ehrbackend;
 
 import ch.zhaw.init.ehr.ehrbackend.model.User;
 import ch.zhaw.init.ehr.ehrbackend.model.UserRole;
 import ch.zhaw.init.ehr.ehrbackend.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
-
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -280,7 +177,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataInitializer implements CommandLineRunner {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(DataInitializer.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -312,46 +209,34 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        try{
-            System.out.println("DataInitializer running...");
-            logger.info("DataInitializer running...");
-            // Create a default regular user if not exists
-            if (!userRepository.existsByUsername(defaultUserUsername)) {
-                User user = new User();
-                user.setUsername(defaultUserUsername);
-                user.setPassword(passwordEncoder.encode(defaultUserPassword));
-                user.setRole(UserRole.ROLE_STANDARDUSER);
-                userRepository.save(user);
-            }
-    
-            // Create a default admin if not exists
-            if (!userRepository.existsByUsername(defaultAdminUsername)) {
-                User admin = new User();
-                admin.setUsername(defaultAdminUsername);
-                admin.setPassword(passwordEncoder.encode(defaultAdminPassword));
-                admin.setRole(UserRole.ROLE_ADMIN);
-                userRepository.save(admin);
-            }
-    
-            // Create a default superuser if not exists
-            if (!userRepository.existsByUsername(defaultSuperuserUsername)) {
-                User superuser = new User();
-                superuser.setUsername(defaultSuperuserUsername);
-                superuser.setPassword(passwordEncoder.encode(defaultSuperuserPassword));
-                superuser.setRole(UserRole.ROLE_SUPERUSER);
-                userRepository.save(superuser);
-            }
-        }
-        catch (Exception e){
-            System.out.println("DataInitializer error: " + e.getMessage());
-            logger.error("DataInitializer error: " + e.getMessage());
-            logger.error("❌ Error during DataInitializer", e); 
+        System.out.println("DataInitializer running...");
+        logger.info("DataInitializer running...");
+        // Create a default regular user if not exists
+        if (!userRepository.existsByUsername(defaultUserUsername)) {
+            User user = new User();
+            user.setUsername(defaultUserUsername);
+            user.setPassword(passwordEncoder.encode(defaultUserPassword));
+            user.setRole(UserRole.ROLE_STANDARDUSER);
+            userRepository.save(user);
         }
 
-    }
-    @PostConstruct
-    public void postConstruct() {
-        logger.info("✅✅✅ DataInitializer POST CONSTRUCT CALLED");
+        // Create a default admin if not exists
+        if (!userRepository.existsByUsername(defaultAdminUsername)) {
+            User admin = new User();
+            admin.setUsername(defaultAdminUsername);
+            admin.setPassword(passwordEncoder.encode(defaultAdminPassword));
+            admin.setRole(UserRole.ROLE_ADMIN);
+            userRepository.save(admin);
+        }
+
+        // Create a default superuser if not exists
+        if (!userRepository.existsByUsername(defaultSuperuserUsername)) {
+            User superuser = new User();
+            superuser.setUsername(defaultSuperuserUsername);
+            superuser.setPassword(passwordEncoder.encode(defaultSuperuserPassword));
+            superuser.setRole(UserRole.ROLE_SUPERUSER);
+            userRepository.save(superuser);
+        }
     }
 }
 
@@ -359,6 +244,77 @@ public class DataInitializer implements CommandLineRunner {
 
 
 
+
+===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/config/SecurityConfig.java =====
+package ch.zhaw.init.ehr.ehrbackend.config;
+
+import ch.zhaw.init.ehr.ehrbackend.service.UserService;
+
+import java.util.List;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+
+    public SecurityConfig(UserService userService, PasswordEncoder passwordEncoder) {
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPERUSER")
+                .requestMatchers("/superuser/**").hasRole("SUPERUSER")
+                .requestMatchers("/doctor/**").hasRole("DOCTOR")
+                .requestMatchers("/patient/**").hasRole("PATIENT")
+                .requestMatchers("/public/**", "/login").permitAll()
+                .anyRequest().authenticated()
+            )
+            .formLogin()
+            .and()
+            .logout();
+
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedHeaders(List.of("*"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+}
 
 ===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/config/PasswordEncoderConfig.java =====
 package ch.zhaw.init.ehr.ehrbackend.config;
@@ -374,34 +330,6 @@ public class PasswordEncoderConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-}
-
-===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/security/JwtUtil.java =====
-package ch.zhaw.init.ehr.ehrbackend.security;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-
-import org.springframework.stereotype.Component;
-
-import java.security.Key;
-import java.util.Date;
-
-@Component
-public class JwtUtil {
-
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final long EXPIRATION_TIME = 86400000; // 1 day
-
-    public String generateToken(String username, String role) {
-        return Jwts.builder()
-                .setSubject(username)
-                .claim("role", role)
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(key)
-                .compact();
     }
 }
 
@@ -430,46 +358,6 @@ public class GreetingController {
 		return new Greeting(counter.incrementAndGet(), String.format(template, name));
 	}
 }
-
-===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/controller/AuthController.java =====
-package ch.zhaw.init.ehr.ehrbackend.controller;
-
-import ch.zhaw.init.ehr.ehrbackend.dto.LoginRequest;
-import ch.zhaw.init.ehr.ehrbackend.dto.LoginResponse;
-import ch.zhaw.init.ehr.ehrbackend.model.User;
-import ch.zhaw.init.ehr.ehrbackend.repository.UserRepository;
-import ch.zhaw.init.ehr.ehrbackend.security.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-
-@RestController
-@RequestMapping("/login")
-@CrossOrigin(origins = "*") // for frontend access during development
-public class AuthController {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @PostMapping
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        return userRepository.findByUsername(request.username)
-                .filter(user -> passwordEncoder.matches(request.password, user.getPassword()))
-                .map(user -> {
-                    String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
-                    return ResponseEntity.ok(new LoginResponse(token, user.getRole().name()));
-                })
-                .orElse(ResponseEntity.status(401).body(new LoginResponse("Invalid credentials", null)));
-    }
-}
-
 
 ===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/controller/MedicalRecordController.java =====
 package ch.zhaw.init.ehr.ehrbackend.controller;
@@ -611,25 +499,26 @@ public class UserController {
 ===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/EhrbackendApplication.java =====
 package ch.zhaw.init.ehr.ehrbackend;
 
-import java.util.Arrays;
-
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.metrics.MetricsProperties.Data;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-
-@SpringBootApplication(scanBasePackages = "ch.zhaw.init.ehr.ehrbackend")
+@Configuration
+//@EnableJpaRepositories(basePackages = { "ch.zhaw.init.ehr.ehrbackend.repository" })
+//@SpringBootApplication(scanBasePackages = { "ch.zhaw.init.ehr.ehrbackend" })
 public class EhrbackendApplication {
-    public static void main(String[] args) {
-        ConfigurableApplicationContext context = SpringApplication.run(EhrbackendApplication.class, args);
 
-        System.out.println("✅ Registered beans:");
-        Arrays.stream(context.getBeanDefinitionNames())
-                .filter(bean -> bean.toLowerCase().contains("datainitializer"))
-                .forEach(System.out::println);
-    }
+	public static void main(String[] args) {
+		
+		var context = SpringApplication.run(EhrbackendApplication.class, args);
+		context.getBean(HelloRunner.class).run(args);
+		context.getBean(DataInitializer.class).run(args);
+	}
+
 }
-
 
 
 ===== ./src/main/java/ch/zhaw/init/ehr/ehrbackend/HelloRunner.java =====
@@ -638,8 +527,6 @@ package ch.zhaw.init.ehr.ehrbackend;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
-import ch.zhaw.init.ehr.ehrbackend.config.DataInitializer;
 
 @Component
 public class HelloRunner implements CommandLineRunner {
