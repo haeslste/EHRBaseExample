@@ -9,9 +9,11 @@ services:
       POSTGRES_USER: ehruser
       POSTGRES_PASSWORD: ehrpass
     ports:
-      - "5433:5433"
+      - "5432:5432"
     volumes:
       - ehrdb-data:/var/lib/postgresql/data
+    networks:
+      - backend
 
   ehr-app:
     build: ./SpringBootApp
@@ -22,8 +24,44 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://ehrdb:5432/ehrdb
       SPRING_DATASOURCE_USERNAME: ehruser
       SPRING_DATASOURCE_PASSWORD: ehrpass
+      default.user.username: user
+      default.user.password: password
+      default.admin.username: admin
+      default.admin.password: adminpass
+      default.superuser.username: superuser
+      default.superuser.password: superpass
     depends_on:
       - ehrdb
+    networks:
+      - backend
+      - frontend
+
+  ehr-frontend:
+    container_name: ehr-frontend
+    build:
+      context: ./ehr-frontend-next
+      target: dev
+    restart: always
+    command: yarn dev
+    environment:
+      - NODE_ENV=development 
+    volumes:
+      - ./ehr-frontend-next:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ehr-app
+      - ehrdb
+    networks:
+      - frontend
 
 volumes:
   ehrdb-data:
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
