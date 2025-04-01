@@ -12,5 +12,9 @@ public class Doctor {
 
     private String firstName;
     private String lastName;
-    private String speciality; 
+    private String speciality;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true, nullable = false)
+    private User user;
 }

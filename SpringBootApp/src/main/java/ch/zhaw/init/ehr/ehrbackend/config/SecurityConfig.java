@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,9 +15,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import ch.zhaw.init.ehr.ehrbackend.security.JWTAuthFilter; // Ensure this is the correct package for JwtAuthenticationFilter
 
 @Configuration
 @EnableWebSecurity
@@ -40,20 +43,25 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JWTAuthFilter jwtAuthFilter) throws Exception{
         http
             .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless API
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPERUSER")
                 .requestMatchers("/superuser/**").hasRole("SUPERUSER")
-                .requestMatchers("/doctor/**").hasRole("DOCTOR")
-                .requestMatchers("/patient/**").hasRole("PATIENT")
+                .requestMatchers("/doctor/**").hasAnyRole("ADMIN", "SUPERUSER", "DOCTOR")
+                .requestMatchers("/patient/**").hasAnyRole("ADMIN", "SUPERUSER", "DOCTOR")
+                .requestMatchers("/template/**").hasAnyRole("ADMIN", "SUPERUSER")
+                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPERUSER")
+                .requestMatchers(HttpMethod.DELETE, "/doctor/**", "/patient/**").hasAnyRole("ADMIN", "SUPERUSER")
                 .requestMatchers("/public/**", "/login").permitAll()
                 .anyRequest().authenticated()
             )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Statelessor debug
-            .formLogin(AbstractHttpConfigurer::disable); 
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+ 
 
         return http.build();
     }

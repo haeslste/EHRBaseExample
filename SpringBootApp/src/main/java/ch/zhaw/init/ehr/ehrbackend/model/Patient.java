@@ -9,8 +9,12 @@ public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private String firstName;
     private String lastName;
-    private String dateOfBirth; //TODO: change to LocalDate
+    private String dateOfBirth;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true, nullable = false)
+    private User user;
 }

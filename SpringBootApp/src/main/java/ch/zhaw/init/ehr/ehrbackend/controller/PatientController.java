@@ -1,5 +1,7 @@
 package ch.zhaw.init.ehr.ehrbackend.controller;
 
+import ch.zhaw.init.ehr.ehrbackend.dto.PatientDto;
+import ch.zhaw.init.ehr.ehrbackend.dto.UserDto;
 import ch.zhaw.init.ehr.ehrbackend.model.Patient;
 import ch.zhaw.init.ehr.ehrbackend.service.PatientService;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +22,30 @@ public class PatientController {
         return patientService.savePatient(patient);
     }
 
-    @GetMapping("/{id}")
-    public Patient getPatient(@PathVariable Long id) {
-        return patientService.getPatient(id);
+    @GetMapping("/all")
+    public List<PatientDto> getAllPatients() {
+        return patientService.getAllPatients().stream()
+            .map(this::toDto)
+            .toList();
     }
 
-    @GetMapping
-    public List<Patient> getAllPatients() {
-        return patientService.getAllPatients();
+    @GetMapping("/{id}")
+    public PatientDto getPatient(@PathVariable Long id) {
+        return toDto(patientService.getPatient(id));
     }
+
+    private PatientDto toDto(Patient patient) {
+        return new PatientDto(
+            patient.getId(),
+            patient.getFirstName(),
+            patient.getLastName(),
+            patient.getDateOfBirth(),
+            new UserDto(
+                patient.getUser().getId(),
+                patient.getUser().getUsername(),
+                patient.getUser().getRole()
+            )
+        );
+    }
+
 }
