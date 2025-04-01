@@ -8,12 +8,14 @@ import Cookies from 'js-cookie';
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoggingIn(true);
     try {
         const { token, role } = await login(username, password);
 
@@ -38,11 +40,12 @@ export default function LoginPage() {
     } catch (err) {
       setError("Invalid credentials");
     }
+    setIsLoggingIn(false);
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: "auto", padding: "2rem" }}>
-      <h2>Login</h2>
+    <div className="flex flex-col p-4 max-w-md mx-auto self-auto">
+      <h1 className="mb-4 text-2xl">Login</h1>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -50,6 +53,7 @@ export default function LoginPage() {
           value={username}
           onChange={e => setUsername(e.target.value)}
           required
+          className="mb-2 border rounded p-2" 
         />
         <br />
         <input
@@ -58,9 +62,12 @@ export default function LoginPage() {
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
+          className="mb-2 border rounded p-2" 
         />
         <br />
-        <button type="submit">Login</button>
+        <button type="submit" className="center w-45 in-focus-visible:border-b-blue-500  form-button bg-blue-400 p-3 rounded-xl "  disabled={isLoggingIn}>
+          {isLoggingIn ? 'Logging in...' : 'Login'}
+        </button>
         {error && <p style={{ color: "red" }}>{error}</p>}
       </form>
     </div>
