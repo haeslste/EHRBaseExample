@@ -9,14 +9,17 @@ import { SelectInput } from '@/components/forms/inputs/SelectInput';
 import { Sidebar } from '@/components/sidebar';
 import {fetchDoctors} from "@/services/doctors_service";
 import {fetchPatients} from "@/services/patients_service";
+import { postComposition } from '../services/composition_service';
+import { fetchTemplates } from '@/services/template_service';
 import { UserList } from './userList';
 import {useNavigate} from "react-router-dom";
 import { useRouter } from 'next/navigation';
 
 
+
 const AdminDashboard: React.FC = () => {
   const [users, setUsers] = useState([{}]);
-  const [templates, setTemplates] = useState([]);
+  const [templates, setTemplates] = useState([{}]);
   const [forms, setForms] = useState([]);
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -39,6 +42,7 @@ const AdminDashboard: React.FC = () => {
   const fetchData = async () => {
     const doctors = await fetchDoctors();
     const patients = await fetchPatients();
+    const templates = await fetchTemplates();
     setDoctors(doctors);
     setPatients(patients);
     const mappedDoctors = doctors.map((doctor) => ({
@@ -55,8 +59,10 @@ const AdminDashboard: React.FC = () => {
       username: patient.user.username,
       role: 'Patient',
     }));
+    
     const allUsers = [...mappedDoctors, ...mappedPatients];
     setUsers(allUsers);
+    setTemplates(templates);
   }
  
   useEffect(() => {
@@ -78,13 +84,26 @@ const AdminDashboard: React.FC = () => {
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           onClick={() => router.push('/admin/upload-template')}
         >Create Template</button>
+
+        <button
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          onClick={() => postComposition()}
+        >Post Composition</button>
         <DataTable
           columns={[
             { key: 'name', label: 'Template Name' },
+            { key: 'description', label: 'Description' },
             {
               key: 'actions',
               label: 'Actions',
-              render: (row) => <button className="text-blue-600 hover:underline">View</button>,
+              render: (row) => (
+                <button
+                  className="text-blue-600 hover:underline"
+                  onClick={() => router.push(`/admin/form-builder/${row.templateId}/`)}
+                >
+                  Build Form
+                </button>
+              ),
             },
           ]}
           data={templates}

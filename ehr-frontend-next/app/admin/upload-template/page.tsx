@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function UploadTemplatePage() {
   const [templateName, setTemplateName] = useState('');
@@ -8,6 +9,7 @@ export default function UploadTemplatePage() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
+  const router = useRouter();
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +40,7 @@ export default function UploadTemplatePage() {
         setTemplateName('');
         setDescription('');
         setFile(null);
+        router.push('/admin');
       } else {
         const err = await res.text();
         setMessage(`❌ Upload failed: ${err}`);
