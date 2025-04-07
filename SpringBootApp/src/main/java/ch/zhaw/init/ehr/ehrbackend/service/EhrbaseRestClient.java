@@ -4,6 +4,7 @@ package ch.zhaw.init.ehr.ehrbackend.service;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -14,8 +15,9 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class EhrbaseRestClient {
 
-    @Value("${ehrbase.url:http://localhost:8080/ehrbase/rest/openehr/v1}")
+    @Value("${ehrbase.url}")
     private String ehrbaseUrl;
+
 
     public void uploadTemplateToEhrbase(String xml) {
         RestTemplate restTemplate = new RestTemplate();
@@ -38,8 +40,7 @@ public class EhrbaseRestClient {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
     
         HttpEntity<String> entity = new HttpEntity<>(headers);
-    
-        String url = ehrbaseUrl + "/definition/template/" + templateId + "/web";
+        String url = ehrbaseUrl + "/definition/template//adl1.4/" + templateId;
     
         ResponseEntity<String> response = restTemplate.exchange(
             url,
@@ -49,9 +50,33 @@ public class EhrbaseRestClient {
         );
     
         if (!response.getStatusCode().is2xxSuccessful()) {
+            // log the error or handle it as needed
+            System.err.println("Error fetching WebTemplate: " + response.getStatusCode());
             throw new RuntimeException("EHRbase returned status: " + response.getStatusCode());
         }
     
+        return response.getBody();
+    }
+
+    public String submitComposition(String ehrId, String templateId, String compositionJson) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+    
+        HttpEntity<String> request = new HttpEntity<>(compositionJson, headers);
+    
+        String url = ehrbaseUrl + "/ehr/" + ehrId + "/composition?templateId=" + templateId + "&format=FLAT";
+    
+        ResponseEntity<String> response = restTemplate.exchange(
+            url, HttpMethod.POST, request, String.class
+        );
+    
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Failed to submit composition to EHRbase: " + response.getStatusCode());
+        }
+    
+        //TODO: parse the UID from response if needed
         return response.getBody();
     }
     

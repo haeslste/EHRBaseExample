@@ -4,6 +4,7 @@ import ch.zhaw.init.ehr.ehrbackend.model.Template;
 import ch.zhaw.init.ehr.ehrbackend.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -47,15 +48,24 @@ public class TemplateService {
     }
 
     private String extractTemplateId(String xml) {
-        // simple hacky extract from XML - better use XML parser
-        int start = xml.indexOf("<template_id>");
-        int end = xml.indexOf("</template_id>");
-        return xml.substring(start + 13, end).trim();
+        String startTag = "<template_id>";
+        String valueStart = "<value>";
+        String valueEnd = "</value>";
+        int start = xml.indexOf(startTag);
+        if (start == -1) return null;
+        int valueStartIndex = xml.indexOf(valueStart, start);
+        int valueEndIndex = xml.indexOf(valueEnd, valueStartIndex);
+        return xml.substring(valueStartIndex + valueStart.length(), valueEndIndex).trim();
     }
-
+    
     private String extractTemplateName(String xml) {
-        int start = xml.indexOf("<name>");
-        int end = xml.indexOf("</name>");
-        return start != -1 && end != -1 ? xml.substring(start + 6, end).trim() : null;
+        String startTag = "<name>";
+        String valueStart = "<value>";
+        String valueEnd = "</value>";
+        int start = xml.indexOf(startTag);
+        if (start == -1) return null;
+        int valueStartIndex = xml.indexOf(valueStart, start);
+        int valueEndIndex = xml.indexOf(valueEnd, valueStartIndex);
+        return xml.substring(valueStartIndex + valueStart.length(), valueEndIndex).trim();
     }
 }
