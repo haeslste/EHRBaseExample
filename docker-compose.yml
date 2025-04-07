@@ -8,8 +8,6 @@ services:
       POSTGRES_DB: ehrdb
       POSTGRES_USER: ehruser
       POSTGRES_PASSWORD: ehrpass
-    ports:
-      - "5432:5432"
     volumes:
       - ehrdb-data:/var/lib/postgresql/data
     networks:
@@ -30,6 +28,7 @@ services:
       default.admin.password: adminpass
       default.superuser.username: superuser
       default.superuser.password: superpass
+      EHRBASE_URL: http://ehrbase-server:8080/ehrbase/rest/openehr/v1
     depends_on:
       - ehrdb
     networks:
@@ -57,8 +56,52 @@ services:
     networks:
       - frontend
 
+  ehrbase:
+    image: ehrbase/ehrbase:next
+    container_name: ehrbase-server
+    environment:
+      DB_URL: jdbc:postgresql://database:5432/ehrbase
+      DB_USER: ehrbase_restricted
+      DB_PASS: ehrbase_restricted
+      DB_USER_ADMIN: ehrbase
+      DB_PASS_ADMIN: ehrbase
+      SERVER_NODENAME: local.ehrbase.org
+      SPRING_PROFILES_ACTIVE: local
+    ports:
+      - 8080:8080
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: always
+
+
+  database:
+    image: ehrbase/ehrbase-v2-postgres:16.2
+    container_name: ehrbase-database
+    environment:
+      POSTGRES_USER: postgres
+      PASSWORD: postgres
+      EHRBASE_USER: ehrbase_restricted
+      EHRBASE_PASSWORD: ehrbase_restricted
+      EHRBASE_USER_ADMIN: ehrbase
+      EHRBASE_PASSWORD_ADMIN: ehrbase
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
 volumes:
   ehrdb-data:
+  db_data:
+
 
 networks:
   frontend:
