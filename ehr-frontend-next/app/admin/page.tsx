@@ -3,16 +3,13 @@ import { FC, useState, useEffect } from 'react';
 import { DataTable } from '@/components/tables/DataTable';
 import { Card } from '@/components/cards/Card';
 import { Modal } from '@/components/modals/Modal';
-import { ConfirmModal } from '@/components/modals/ConfirmModal';
 import { TextInput } from '@/components/forms/inputs/TextInput';
 import { SelectInput } from '@/components/forms/inputs/SelectInput';
-import { Sidebar } from '@/components/sidebar';
 import {fetchDoctors} from "@/services/doctors_service";
 import {fetchPatients} from "@/services/patients_service";
 import { postComposition } from '../services/composition_service';
 import { fetchTemplates } from '@/services/template_service';
 import { UserList } from './userList';
-import {useNavigate} from "react-router-dom";
 import { useRouter } from 'next/navigation';
 import { UploadTemplateModal } from '@/components/UploadTemplateModal';
 
