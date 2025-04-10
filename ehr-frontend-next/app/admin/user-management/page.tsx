@@ -4,7 +4,6 @@ import {fetchDoctors} from "@/services/doctors_service";
 import {fetchPatients} from "@/services/patients_service";
 import { UserList } from './userList';
 
-
 interface UserData {
   id: string;
   firstName: string;
