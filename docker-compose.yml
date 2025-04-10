@@ -31,6 +31,7 @@ services:
       EHRBASE_URL: http://ehrbase-server:8080/ehrbase/rest/openehr/v1
     depends_on:
       - ehrdb
+      - ehrbase
     networks:
       - backend
       - frontend
