@@ -1,5 +1,7 @@
 package ch.zhaw.init.ehr.ehrbackend.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -11,4 +13,5 @@ public class DoctorDto {
     private String lastName;
     private String speciality;
     private UserDto user;
+    private List<PatientDto> patients;
 }

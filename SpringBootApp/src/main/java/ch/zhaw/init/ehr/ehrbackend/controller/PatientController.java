@@ -1,5 +1,6 @@
 package ch.zhaw.init.ehr.ehrbackend.controller;
 
+import ch.zhaw.init.ehr.ehrbackend.dto.DoctorDto;
 import ch.zhaw.init.ehr.ehrbackend.dto.PatientDto;
 import ch.zhaw.init.ehr.ehrbackend.dto.UserDto;
 import ch.zhaw.init.ehr.ehrbackend.model.Patient;
@@ -35,17 +36,22 @@ public class PatientController {
     }
 
     private PatientDto toDto(Patient patient) {
+        List<DoctorDto> doctorDtos = patient.getDoctors().stream().map(doctor -> new DoctorDto(
+            doctor.getId(),
+            doctor.getFirstName(),
+            doctor.getLastName(),
+            doctor.getSpeciality(),
+            new UserDto(doctor.getUser().getId(), doctor.getUser().getUsername(), doctor.getUser().getRole()),
+            null // don't embed patients inside doctors to avoid infinite loop
+        )).toList();
+
         return new PatientDto(
             patient.getId(),
             patient.getFirstName(),
             patient.getLastName(),
             patient.getDateOfBirth(),
-            new UserDto(
-                patient.getUser().getId(),
-                patient.getUser().getUsername(),
-                patient.getUser().getRole()
-            )
+            new UserDto(patient.getUser().getId(), patient.getUser().getUsername(), patient.getUser().getRole()),
+            doctorDtos
         );
     }
-
 }

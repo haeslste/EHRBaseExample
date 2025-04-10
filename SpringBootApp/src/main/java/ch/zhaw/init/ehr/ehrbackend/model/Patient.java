@@ -1,5 +1,8 @@
 package ch.zhaw.init.ehr.ehrbackend.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,6 +16,10 @@ public class Patient {
     private String firstName;
     private String lastName;
     private String dateOfBirth;
+
+    @ManyToMany(mappedBy = "patients")
+    @Builder.Default
+    private Set<Doctor> doctors = new HashSet<>();
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true, nullable = false)

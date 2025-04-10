@@ -1,7 +1,9 @@
 package ch.zhaw.init.ehr.ehrbackend.controller;
 
 import ch.zhaw.init.ehr.ehrbackend.dto.DoctorDto;
+import ch.zhaw.init.ehr.ehrbackend.dto.DoctorPatientLinkRequest;
 import ch.zhaw.init.ehr.ehrbackend.dto.UserDto;
+import ch.zhaw.init.ehr.ehrbackend.dto.PatientDto;
 import ch.zhaw.init.ehr.ehrbackend.model.Doctor;
 import ch.zhaw.init.ehr.ehrbackend.service.DoctorService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +32,22 @@ public class DoctorController {
         return toDto(doctorService.getDoctor(id));
     }
 
+    @PostMapping("/assign")
+    public ResponseEntity<?> assignPatient(@RequestBody DoctorPatientLinkRequest request) {
+        doctorService.assignPatientToDoctor(request.getDoctorId(), request.getPatientId());
+        return ResponseEntity.ok("✅ Patient assigned to doctor");
+    }
+
     private DoctorDto toDto(Doctor doctor) {
+        List<PatientDto> patientDtos = doctor.getPatients().stream().map(patient -> new PatientDto(
+        patient.getId(),
+        patient.getFirstName(),
+        patient.getLastName(),
+        patient.getDateOfBirth(),
+        new UserDto(patient.getUser().getId(), patient.getUser().getUsername(), patient.getUser().getRole()),
+        null // Avoid circular reference
+        )).toList();
+
         return new DoctorDto(
             doctor.getId(),
             doctor.getFirstName(),
@@ -40,7 +57,8 @@ public class DoctorController {
                 doctor.getUser().getId(),
                 doctor.getUser().getUsername(),
                 doctor.getUser().getRole()
-            )
+            ),
+            patientDtos
         );
     }
 
