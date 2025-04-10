@@ -53,8 +53,8 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="p-16 space-y12 ">
-        <UserList users={doctors} title="Doctors" setUsers={setDoctors}/>
-        <UserList users={patients} title="Patients" setUsers={setPatients}/>
+        <UserList users={doctors} title="Doctors" setUsers={setDoctors} linkableUsers={patients}/>
+        <UserList users={patients} title="Patients" setUsers={setPatients} linkableUsers={doctors}/>
     </div>
   );
 };
