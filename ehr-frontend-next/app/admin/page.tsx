@@ -29,15 +29,6 @@ const AdminDashboard: React.FC = () => {
   const [openModal, setOpenModal] = useState(false);
   const router = useRouter();
 
-  /*
-  useEffect(() => {
-    // Fetch initial data (replace with your API calls)
-    setUsers([{ id: '1', name: 'Dr. Alice', role: 'Doctor' }]);
-    setTemplates([{ id: 't1', name: 'Blood Pressure' }]);
-    setForms([{ id: 'f1', name: 'Blood Pressure Entry', patient: 'John Doe' }]);
-  }, []);
-  */
-
   const fetchData = async () => {
     const doctors = await fetchDoctors();
     const patients = await fetchPatients();
