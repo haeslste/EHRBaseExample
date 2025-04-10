@@ -12,8 +12,18 @@ import { fetchTemplates } from '@/services/template_service';
 import { UserList } from './userList';
 import { useRouter } from 'next/navigation';
 import { UploadTemplateModal } from '@/components/UploadTemplateModal';
+import { User } from '../components/sidebar/icons';
 
-
+interface UserData {
+  id: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  role: string;
+  user: { id: string; 
+    username:string;
+  }
+}
 
 const AdminDashboard: React.FC = () => {
   const [users, setUsers] = useState([{}]);
@@ -29,20 +39,21 @@ const AdminDashboard: React.FC = () => {
   const [openModal, setOpenModal] = useState(false);
   const router = useRouter();
 
+
   const fetchData = async () => {
     const doctors = await fetchDoctors();
     const patients = await fetchPatients();
     const templates = await fetchTemplates();
     setDoctors(doctors);
     setPatients(patients);
-    const mappedDoctors = doctors.map((doctor) => ({
+    const mappedDoctors = doctors.map((doctor:UserData) => ({
       id: doctor.user.id,
       name: `${doctor.firstName}`,
       lastName: `${doctor.lastName}`,
       username: doctor.user.username,
       role: 'Doctor',
     }));
-    const mappedPatients = patients.map((patient) => ({
+    const mappedPatients = patients.map((patient:UserData) => ({
       id: patient.user.id,
       name: `${patient.firstName}`,
       lastName: `${patient.lastName}`,
@@ -86,7 +97,7 @@ const AdminDashboard: React.FC = () => {
             {
               key: 'actions',
               label: 'Actions',
-              render: (row) => (
+              render: (row:any) => (
                 <button
                   className="text-blue-600 hover:underline"
                   onClick={() => router.push(`/admin/form-builder/${row.templateId}/`)}
@@ -109,7 +120,7 @@ const AdminDashboard: React.FC = () => {
             {
               key: 'actions',
               label: 'Actions',
-              render: (row) => <button className="text-blue-600 hover:underline">View Details</button>,
+              render: (row:any) => <button className="text-blue-600 hover:underline">View Details</button>,
             },
           ]}
           data={forms}
