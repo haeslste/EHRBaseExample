@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./navbar/Navbar";
 import { Providers } from "./providers";
-import { Sidebar } from "./components/sidebar";
+import { Sidebar } from "./components/sidebar/admin-siderbar";
 
 import { useState, type PropsWithChildren } from "react";
 
