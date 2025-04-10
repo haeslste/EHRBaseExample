@@ -11,6 +11,13 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.json.Json;
+
 @Service
 @RequiredArgsConstructor
 public class EhrbaseRestClient {
@@ -79,6 +86,47 @@ public class EhrbaseRestClient {
         //TODO: parse the UID from response if needed
         return response.getBody();
     }
+
+    private String getEHRId(ResponseEntity<String> response) {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root;
+        String ehrId = null;
+        try {
+            root = mapper.readTree(response.getBody());
+            ehrId = root.path("ehr_id").path("value").asText();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+            return null;
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return ehrId;
+    }
+    public String createPatientEHR(String PatienId) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        
+        String url = ehrbaseUrl + "/ehr?subject_id=" + PatienId + "&subject_namespace=EHRbase";
+        
+    
+        ResponseEntity<String> response = restTemplate.exchange(
+            url, HttpMethod.POST, null, String.class
+        );
+        
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Failed to create EHR for patient: " + response.getStatusCode());
+        }
+
+        String ehrId = getEHRId(response);
+        if (ehrId == null) {
+            throw new RuntimeException("Failed to parse EHR ID from response: " + response.getBody());
+        }
+        return ehrId;
+    } 
     
     
 }
