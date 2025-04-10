@@ -9,7 +9,7 @@ import {fetchDoctors} from "@/services/doctors_service";
 import {fetchPatients} from "@/services/patients_service";
 import { postComposition } from '../services/composition_service';
 import { fetchTemplates } from '@/services/template_service';
-import { UserList } from './userList';
+import { UserList } from './user-management/userList';
 import { useRouter } from 'next/navigation';
 import { UploadTemplateModal } from '@/components/UploadTemplateModal';
 import { User } from '../components/sidebar/icons';

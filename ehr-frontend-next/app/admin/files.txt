@@ -1,0 +1,380 @@
+===== ./upload-template/page.tsx =====
+'use client';
+
+import { useState } from 'react';
+
+export default function UploadTemplatePage() {
+  const [templateName, setTemplateName] = useState('');
+  const [description, setDescription] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file || !templateName) {
+      setMessage('Please fill in the name and select a file.');
+      return;
+    }
+
+    setUploading(true);
+    setMessage('');
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('templateName', templateName);
+    formData.append('description', description);
+
+    try {
+      const res = await fetch('http://localhost:8085/admin/templates/upload', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (res.ok) {
+        setMessage('✅ Template uploaded successfully!');
+        setTemplateName('');
+        setDescription('');
+        setFile(null);
+      } else {
+        const err = await res.text();
+        setMessage(`❌ Upload failed: ${err}`);
+      }
+    } catch (err: any) {
+      setMessage(`❌ Error: ${err.message}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto mt-10 p-6 border rounded shadow-md">
+      <h2 className="text-xl font-bold mb-4">Upload .opt Template</h2>
+      <form onSubmit={handleUpload}>
+        <label className="block mb-2 font-medium">
+          Template Name
+          <input
+            type="text"
+            className="w-full mt-1 p-2 border rounded"
+            value={templateName}
+            onChange={(e) => setTemplateName(e.target.value)}
+            required
+          />
+        </label>
+
+        <label className="block mb-2 font-medium">
+          Description (optional)
+          <textarea
+            className="w-full mt-1 p-2 border rounded"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+          />
+        </label>
+
+        <label className="block mb-2 font-medium">
+          .opt File
+          <input
+            type="file"
+            accept=".opt"
+            className="w-full mt-1"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            required
+          />
+        </label>
+
+        <button
+          type="submit"
+          disabled={uploading}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+        >
+          {uploading ? 'Uploading...' : 'Upload'}
+        </button>
+
+        {message && (
+          <p className="mt-4 text-sm text-gray-700 whitespace-pre-wrap">
+            {message}
+          </p>
+        )}
+      </form>
+    </div>
+  );
+}
+
+
+===== ./form-builder/[templateId]/page.tsx =====
+"use client";
+
+import { useParams } from "next/navigation";
+import FormBuilder from "@/components/forms/FormBuilder";
+
+export default function TemplateFormPage() {
+  const params = useParams();
+  const templateId = params?.templateId as string;
+  console.log("Rendering template form page with ID: ", templateId);
+  return (
+    <div className="p-10">
+      <h1 className="text-2xl font-bold mb-4">Fill Out Form</h1>
+      <FormBuilder templateId={templateId} />
+    </div>
+  );
+}
+
+
+===== ./form-builder/page.tsx =====
+"use client";
+import { useEffect, useState } from "react";
+
+export default function FormBuilder({ templateId }: { templateId: string }) {
+  const [webTemplate, setWebTemplate] = useState<any>(null);
+
+    useEffect(() => {
+        async function fetchWebTemplate() {
+            const res = await fetch(`/api/templates/${templateId}/webtemplate`);
+            const data = await res.json();
+            setWebTemplate(data);
+        }
+        console.log("Fetching web template with ID: ", templateId);
+        fetchWebTemplate();
+        }, [templateId]);
+
+  if (!webTemplate) return <p>Loading...</p>;
+
+  return (
+    <div>
+      <h2>Template: {webTemplate.templateId}</h2>
+      {/* Render form dynamically here */}
+      {webTemplate.tree?.children?.map((node: any) => (
+        <div key={node.id}>
+          <label>{node.name}</label>
+          <input type="text" name={node.id} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
+===== ./templates/bmi/page.tsx =====
+"use client";
+
+export default function TestPage() {
+
+  return  
+}
+
+
+===== ./userList.tsx =====
+"use client";
+import { FC } from 'react';
+import { DataTable } from '@/components/tables/DataTable';
+import { Card } from '../components/cards/Card';
+
+interface User {
+  id: number;
+  name: string;
+  lastName: string;
+  username: string;
+  role: string;
+}
+
+interface UserListProps {
+  users: User[{}];
+  onEdit: (user: User) => void;
+}
+
+export const UserList: FC<UserListProps> = ({ users, onEdit }) => {
+  return (
+    <Card className="space-y-4">
+    <h2 className="text-xl font-semibold">User Management</h2>
+    <DataTable
+      columns={[
+        { key: 'name', label: 'Name' },
+        { key: 'lastName', label: 'Last Name' },
+        { key: 'username', label: 'Username' },
+        { key: 'role', label: 'Role' },
+        {
+          key: 'actions',
+          label: 'Actions',
+          render: (row) => (
+            <button
+              className="text-blue-600 hover:underline"
+              onClick={() => onEdit(row)}
+            >
+              Edit
+            </button>
+          ),
+        },
+      ]}
+      data={users}
+    />
+    </Card>
+  );
+};
+
+
+===== ./page.tsx =====
+"use client";
+import { FC, useState, useEffect } from 'react';
+import { DataTable } from '@/components/tables/DataTable';
+import { Card } from '@/components/cards/Card';
+import { Modal } from '@/components/modals/Modal';
+import { ConfirmModal } from '@/components/modals/ConfirmModal';
+import { TextInput } from '@/components/forms/inputs/TextInput';
+import { SelectInput } from '@/components/forms/inputs/SelectInput';
+import { Sidebar } from '@/components/sidebar';
+import {fetchDoctors} from "@/services/doctors_service";
+import {fetchPatients} from "@/services/patients_service";
+import { postComposition } from '../services/composition_service';
+import { fetchTemplates } from '@/services/template_service';
+import { UserList } from './userList';
+import {useNavigate} from "react-router-dom";
+import { useRouter } from 'next/navigation';
+
+
+
+const AdminDashboard: React.FC = () => {
+  const [users, setUsers] = useState([{}]);
+  const [templates, setTemplates] = useState([{}]);
+  const [forms, setForms] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [mappedDoctors, setMappedDoctors] = useState([{}]);
+  const [mappedPatients, setMappedPatients] = useState([{}]);
+
+  const [isUserModalOpen, setUserModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const router = useRouter();
+
+  /*
+  useEffect(() => {
+    // Fetch initial data (replace with your API calls)
+    setUsers([{ id: '1', name: 'Dr. Alice', role: 'Doctor' }]);
+    setTemplates([{ id: 't1', name: 'Blood Pressure' }]);
+    setForms([{ id: 'f1', name: 'Blood Pressure Entry', patient: 'John Doe' }]);
+  }, []);
+  */
+
+  const fetchData = async () => {
+    const doctors = await fetchDoctors();
+    const patients = await fetchPatients();
+    const templates = await fetchTemplates();
+    setDoctors(doctors);
+    setPatients(patients);
+    const mappedDoctors = doctors.map((doctor) => ({
+      id: doctor.user.id,
+      name: `${doctor.firstName}`,
+      lastName: `${doctor.lastName}`,
+      username: doctor.user.username,
+      role: 'Doctor',
+    }));
+    const mappedPatients = patients.map((patient) => ({
+      id: patient.user.id,
+      name: `${patient.firstName}`,
+      lastName: `${patient.lastName}`,
+      username: patient.user.username,
+      role: 'Patient',
+    }));
+    
+    const allUsers = [...mappedDoctors, ...mappedPatients];
+    setUsers(allUsers);
+    setTemplates(templates);
+  }
+ 
+  useEffect(() => {
+      fetchData();
+  }, []);
+
+
+  return (
+    <div className="p-16 space-y-32 ">
+      <UserList users={users} onEdit={(user) => {
+            setSelectedUser(user);
+            setUserModalOpen(true);
+        }} />
+
+
+      <Card className="space-y-4">
+        <h2 className="text-xl font-semibold">Template Management</h2>
+        <button
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          onClick={() => router.push('/admin/upload-template')}
+        >Create Template</button>
+
+        <button
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          onClick={() => postComposition()}
+        >Post Composition</button>
+        <DataTable
+          columns={[
+            { key: 'name', label: 'Template Name' },
+            { key: 'description', label: 'Description' },
+            {
+              key: 'actions',
+              label: 'Actions',
+              render: (row) => (
+                <button
+                  className="text-blue-600 hover:underline"
+                  onClick={() => router.push(`/admin/form-builder/${row.templateId}/`)}
+                >
+                  Build Form
+                </button>
+              ),
+            },
+          ]}
+          data={templates}
+        />
+      </Card>
+
+      <Card className="space-y-4">
+        <h2 className="text-xl font-semibold">Form Submissions</h2>
+        <DataTable
+          columns={[
+            { key: 'name', label: 'Form Name' },
+            { key: 'patient', label: 'Patient' },
+            {
+              key: 'actions',
+              label: 'Actions',
+              render: (row) => <button className="text-blue-600 hover:underline">View Details</button>,
+            },
+          ]}
+          data={forms}
+        />
+      </Card>
+
+      <Modal open={isUserModalOpen} title="Edit User" onClose={() => setUserModalOpen(false)}>
+        <TextInput
+          label="Name"
+          value={selectedUser?.name || ''}
+          onChange={(val) => setSelectedUser({ ...selectedUser, name: val })}
+        />
+        <SelectInput
+          label="Role"
+          options={[
+            { value: 'Admin', label: 'Admin' },
+            { value: 'Doctor', label: 'Doctor' },
+            { value: 'Patient', label: 'Patient' },
+          ]}
+          selected={selectedUser?.role || ''}
+          onChange={(val) => setSelectedUser({ ...selectedUser, role: val })}
+        />
+        <button
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          onClick={() => {
+            setUsers(users.map((u) => (u.id === selectedUser.id ? selectedUser : u)));
+            setUserModalOpen(false);
+          }}
+        >
+          Save
+        </button>
+      </Modal>
+    </div>
+
+  );
+};
+
+export default AdminDashboard;
+
