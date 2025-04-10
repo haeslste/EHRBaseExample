@@ -1,18 +1,9 @@
 "use client";
 import { FC, useState, useEffect } from 'react';
-import { DataTable } from '@/components/tables/DataTable';
-import { Card } from '@/components/cards/Card';
-import { Modal } from '@/components/modals/Modal';
-import { TextInput } from '@/components/forms/inputs/TextInput';
-import { SelectInput } from '@/components/forms/inputs/SelectInput';
 import {fetchDoctors} from "@/services/doctors_service";
 import {fetchPatients} from "@/services/patients_service";
-import { postComposition } from '../..//services/composition_service';
-import { fetchTemplates } from '@/services/template_service';
 import { UserList } from './userList';
-import { useRouter } from 'next/navigation';
-import { UploadTemplateModal } from '@/components/UploadTemplateModal';
-import { User } from '../components/sidebar/icons';
+
 
 interface UserData {
   id: string;
@@ -29,12 +20,6 @@ const AdminDashboard: React.FC = () => {
   const [users, setUsers] = useState([{}]);
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
-
-  const [isUserModalOpen, setUserModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [openModal, setOpenModal] = useState(false);
-  const router = useRouter();
-
 
   const fetchData = async () => {
     const doctors = await fetchDoctors();
@@ -70,7 +55,6 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="p-16 space-y12 ">
         <UserList users={doctors} title="Doctors" setUsers={setDoctors}/>
-
         <UserList users={patients} title="Patients" setUsers={setPatients}/>
     </div>
   );
