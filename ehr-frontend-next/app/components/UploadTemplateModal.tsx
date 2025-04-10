@@ -1,15 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Modal } from '@/components/modals/Modal'; 
 
-export default function UploadTemplatePage() {
+interface UploadTemplateModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export const UploadTemplateModal: React.FC<UploadTemplateModalProps> = ({ open, onClose }) => {
   const [templateName, setTemplateName] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
-  const router = useRouter();
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +44,7 @@ export default function UploadTemplatePage() {
         setTemplateName('');
         setDescription('');
         setFile(null);
-        router.push('/admin');
+        onClose(); // Close modal
       } else {
         const err = await res.text();
         setMessage(`❌ Upload failed: ${err}`);
@@ -53,8 +57,7 @@ export default function UploadTemplatePage() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border rounded shadow-md">
-      <h2 className="text-xl font-bold mb-4">Upload .opt Template</h2>
+    <Modal open={open} onClose={onClose} title="Upload .opt Template">
       <form onSubmit={handleUpload}>
         <label className="block mb-2 font-medium">
           Template Name
@@ -102,6 +105,6 @@ export default function UploadTemplatePage() {
           </p>
         )}
       </form>
-    </div>
+    </Modal>
   );
-}
+};
