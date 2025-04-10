@@ -14,6 +14,7 @@ import { fetchTemplates } from '@/services/template_service';
 import { UserList } from './userList';
 import {useNavigate} from "react-router-dom";
 import { useRouter } from 'next/navigation';
+import { UploadTemplateModal } from '@/components/UploadTemplateModal';
 
 
 
@@ -28,6 +29,7 @@ const AdminDashboard: React.FC = () => {
 
   const [isUserModalOpen, setUserModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [openModal, setOpenModal] = useState(false);
   const router = useRouter();
 
   /*
@@ -82,7 +84,7 @@ const AdminDashboard: React.FC = () => {
         <h2 className="text-xl font-semibold">Template Management</h2>
         <button
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          onClick={() => router.push('/admin/upload-template')}
+          onClick={() => setOpenModal(true)}
         >Create Template</button>
 
         <button
@@ -109,7 +111,7 @@ const AdminDashboard: React.FC = () => {
           data={templates}
         />
       </Card>
-
+      <UploadTemplateModal open={openModal} onClose={() => setOpenModal(false)} />
       <Card className="space-y-4">
         <h2 className="text-xl font-semibold">Form Submissions</h2>
         <DataTable
