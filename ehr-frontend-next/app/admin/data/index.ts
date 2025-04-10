@@ -16,7 +16,7 @@ export const NAV_DATA = [
       },
       {
         title: "Templates",
-        url: "/template-management",
+        url: "/admin/template-management",
         icon: Icons.Calendar,
         items: [],
       },
