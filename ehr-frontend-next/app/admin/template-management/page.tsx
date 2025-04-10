@@ -70,20 +70,15 @@ const AdminTemplateDashboard: React.FC = () => {
             data={templates}
           />
 
-          <div className=" bottom-4 right-4">
+          <div className="flex bottom-4 right-2 justify-end" >
             <button
-              className="px-4 space-x-2 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               onClick={() => setOpenModal(true)}
             >
-              Upload
+              +
             </button>
 
-            <button
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            onClick={() => postComposition()}
-          >
-            Post Composition
-          </button>
+           
     
           </div>
         </Card>
