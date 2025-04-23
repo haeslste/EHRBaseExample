@@ -1,7 +1,7 @@
 'use client';
 
 import { SidebarProvider } from '@/components/sidebar/sidebar-context';
-import { Sidebar } from './admin-siderbar';
+import { Sidebar } from './doctor-siderbar';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
