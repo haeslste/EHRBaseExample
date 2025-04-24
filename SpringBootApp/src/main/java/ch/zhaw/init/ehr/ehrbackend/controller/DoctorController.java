@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -36,6 +37,36 @@ public class DoctorController {
     public ResponseEntity<?> assignPatient(@RequestBody DoctorPatientLinkRequest request) {
         doctorService.assignPatientToDoctor(request.getDoctorId(), request.getPatientId());
         return ResponseEntity.ok("✅ Patient assigned to doctor");
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentDoctor(@RequestAttribute("userId") Long userId) {
+        return ResponseEntity.ok(doctorService.getDoctorByUserId(userId));
+    }
+
+    @GetMapping("/{id}/patients")
+    public List<PatientDto> getPatientsByDoctorId(@PathVariable Long id) {
+        try{
+            Doctor doctor = doctorService.getDoctor(id);
+            System.out.println("Doctor: " + doctor.toString());
+            System.out.println("Doctor ID: " + doctor.getId());
+            System.out.println("Patients: " + doctor.getPatients().size());
+            return doctor.getPatients().stream()
+                .map(patient -> new PatientDto(
+                    patient.getId(),
+                    patient.getFirstName(),
+                    patient.getLastName(),
+                    patient.getDateOfBirth(),
+                    new UserDto(patient.getUser().getId(), patient.getUser().getUsername(), patient.getUser().getRole()),
+                    null // Avoid circular reference
+                )).toList();
+        }
+        catch (RuntimeException e){
+            System.out.println("Doctor not found: " + id);
+            return new ArrayList<>();
+        }
+
+
     }
 
     private DoctorDto toDto(Doctor doctor) {
