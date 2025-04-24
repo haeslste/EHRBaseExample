@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { fetchPatientById } from "@/services/patients_service";
 import { Card } from "@/components/cards/Card";
-
+import { fetchTemplates } from '@/services/template_service';
+import FormSelector from "@/components/FormSelector";
 interface PatientProfileData {
     id: number;
     firstName: string;
@@ -21,6 +22,7 @@ interface PatientProfileData {
     }[];
 }
 
+
 export default function PatientDetailPage({
     params,
 }: {
@@ -28,6 +30,8 @@ export default function PatientDetailPage({
 }) {
     const [patient, setPatient] = useState<PatientProfileData | null>(null);
     const [addingHealthRecord, setAddingHealthRecord] = useState(false);
+    const [templates, setTemplates] = useState([{}]);
+
     useEffect(() => {
         const fetchPatientData = async () => {
             try {
@@ -40,7 +44,17 @@ export default function PatientDetailPage({
             console.log("params:", params);
         };
 
+        const fetchTemplateData = async () => {
+            try {
+                const templates = await fetchTemplates();
+                setTemplates(templates);
+                console.log("templates:", templates);
+            } catch (error) {
+                console.error("Error fetching templates:", error);
+            }
+        }
         fetchPatientData();
+        fetchTemplateData();
     }, [params.id]);
 
     if (!patient) {
@@ -88,6 +102,13 @@ export default function PatientDetailPage({
                 </Card>
             ) : (
                 <Card>
+                    <FormSelector
+                        templates={templates as any[]} // You can strongly type it if needed
+                        onSelect={(templateId) => {
+                            console.log("Selected template for form entry:", templateId);
+                            // You could also set it in state and render the form dynamically
+                        }}
+                        />
                     <div className="mt-4">
                         <h2 className="text-xl font-semibold">Add New Health Record</h2>
                         {/* Add your health record form here */}
