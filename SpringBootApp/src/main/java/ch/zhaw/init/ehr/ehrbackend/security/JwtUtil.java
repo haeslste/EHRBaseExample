@@ -19,14 +19,20 @@ public class JwtUtil {
 
     private final long EXPIRATION_TIME = 86400000; // 1 day
 
-    public String generateToken(String username, String role) {
+    public String generateToken(String username, Long userId,  String role) {
         return Jwts.builder()
                 .subject(username)
+                .claim("userId", userId)
                 .claim("role", role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key)
                 .compact();
+    }
+    
+    public Long extractUserId(String token) {
+        Claims claims = getClaims(token);
+        return claims.get("userId", Long.class);
     }
 
     public String extractUsername(String token) {

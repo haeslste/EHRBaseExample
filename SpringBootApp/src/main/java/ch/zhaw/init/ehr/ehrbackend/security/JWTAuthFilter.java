@@ -47,26 +47,28 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        jwt = authHeader.substring(7); // "Bearer " is 7 chars
-
+        jwt = authHeader.substring(7); // Remove "Bearer "
+        
         try {
             username = jwtUtil.extractUsername(jwt);
+            Long userId = jwtUtil.extractUserId(jwt); // 👈 Extract and store it
+            request.setAttribute("userId", userId);   // 👈 Set it for controller access
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userService.loadUserByUsername(username);
 
                 if (jwtUtil.validateToken(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    logger.debug("Authenticated user '{}' via JWT", username);
+                    logger.debug("✅ Authenticated user '{}' with ID '{}'", username, userId);
                 }
             }
 
         } catch (Exception ex) {
-            logger.warn("JWT token validation error: {}", ex.getMessage());
+            logger.warn("❌ JWT token validation error: {}", ex.getMessage());
         }
 
         filterChain.doFilter(request, response);
