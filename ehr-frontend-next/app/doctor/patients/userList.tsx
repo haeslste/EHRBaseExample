@@ -2,9 +2,6 @@
 import { FC, useState, useEffect } from 'react';
 import { DataTable } from '@/components/tables/DataTable';
 import { Card } from '@/components/cards/Card';
-import { Modal } from '@/components/modals/Modal';
-import { TextInput } from '@/components/forms/inputs/TextInput';
-import { SelectInput } from '@/components/forms/inputs/SelectInput';
 import { useRouter } from 'next/navigation';
 interface User {
   id: number;
@@ -22,11 +19,6 @@ interface UserListProps {
 }
 
 export const UserList: FC<UserListProps> = ({ users, linkableUsers, title, setUsers }) => {
-  const [isUserModalOpen, setUserModalOpen] = useState(false);
-  const [userState, setUserState] = useState<User | null>(null);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isLinkModalOpen, setLinkModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
 
   const onView = (user: User) => {
