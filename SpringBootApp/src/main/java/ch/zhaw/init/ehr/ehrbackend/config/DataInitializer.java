@@ -2,7 +2,12 @@ package ch.zhaw.init.ehr.ehrbackend.config;
 
 import ch.zhaw.init.ehr.ehrbackend.model.*;
 import ch.zhaw.init.ehr.ehrbackend.repository.*;
+import ch.zhaw.init.ehr.ehrbackend.service.*;
 import jakarta.annotation.PostConstruct;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,7 +62,10 @@ public class DataInitializer implements CommandLineRunner {
             createUserIfNotExists(defaultAdminUsername, defaultAdminPassword, UserRole.ROLE_ADMIN);
             createUserIfNotExists(defaultSuperuserUsername, defaultSuperuserPassword, UserRole.ROLE_SUPERUSER);
 
+            
             // Doctors (user1 - user5)
+            List<Doctor> allDoctors = new ArrayList<Doctor>();
+            List<Patient> allPatients = new ArrayList<Patient>();
             for (int i = 1; i <= 5; i++) {
                 String username = "user" + i;
                 String password = "password";
@@ -76,7 +84,7 @@ public class DataInitializer implements CommandLineRunner {
                             .user(savedUser)
                             .build();
                     doctorRepository.save(doctor);
-
+                    allDoctors.add(doctor); 
                     logger.info("Created doctor user '{}' linked to doctor '{} {}'", username, doctor.getFirstName(), doctor.getLastName());
                 }
             }
@@ -100,10 +108,28 @@ public class DataInitializer implements CommandLineRunner {
                             .user(savedUser)
                             .build();
                     patientRepository.save(patient);
-
+                    allPatients.add(patient);
                     logger.info("Created patient user '{}' linked to patient '{} {}'", username, patient.getFirstName(), patient.getLastName());
                 }
             }
+
+            if (!allDoctors.isEmpty() && !allPatients.isEmpty()) {
+                for (Patient patient : allPatients) {
+                    // Assign the first 3 doctors (or fewer if there are less than 3 doctors)
+                    for (int i = 0; i < Math.min(3, allDoctors.size()); i++) {
+                        Doctor doctor = allDoctors.get(i);
+                        doctor.getPatients().add(patient);
+                        logger.info("Assigned doctor '{}' to patient '{}'", 
+                            doctor.getFirstName() + " " + doctor.getLastName(), 
+                            patient.getFirstName() + " " + patient.getLastName());
+                        
+                    }    
+
+                }
+                doctorRepository.saveAll(allDoctors); 
+            }
+        
+
 
         } catch (Exception e) {
             logger.error("❌ Error during DataInitializer", e);
