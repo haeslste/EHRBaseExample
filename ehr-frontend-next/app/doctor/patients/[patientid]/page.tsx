@@ -44,6 +44,11 @@ export default function PatientDetailPage({ params }: { params: { patientid: str
     return <div className="p-6">Loading...</div>;
   }
 
+  const onCreateNewRecord = () => {
+    console.log("Create new record"); 
+
+ }
+
   return (
     <div className="p-6 space-y-4">
       <Card>
@@ -52,7 +57,6 @@ export default function PatientDetailPage({ params }: { params: { patientid: str
         </h1>
         <p><strong>Username:</strong> {patient.user.username}</p>
         <p><strong>Date of Birth:</strong> {patient.dateOfBirth}</p>
-
       </Card>
       <Card>
       <div className="mt-4">
@@ -66,6 +70,12 @@ export default function PatientDetailPage({ params }: { params: { patientid: str
         ) : (
           <p>No medical records available.</p>
         )}
+       <button
+              className="text-white min-w-xs gap-10 rounded-b-sm bg-blue-600 hover:underline"
+              onClick={() => onCreateNewRecord()}
+            >
+              +
+        </button>
       </div>
       </Card>
 
