@@ -29,7 +29,7 @@ public class AuthController {
         return userRepository.findByUsername(request.username)
                 .filter(user -> passwordEncoder.matches(request.password, user.getPassword()))
                 .map(user -> {
-                    String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
+                    String token = jwtUtil.generateToken(user.getUsername(), user.getId() , user.getRole().name());
                     return ResponseEntity.ok(new LoginResponse(token, user.getRole().name()));
                 })
                 .orElse(ResponseEntity.status(401).body(new LoginResponse("Invalid credentials", null)));
