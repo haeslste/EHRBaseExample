@@ -49,14 +49,14 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers( "/admin/templates/webtemplates/{templateId}").hasAnyRole("ADMIN", "SUPERUSER")
-                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPERUSER")
+                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPERUSER", "DOCTOR")
                 .requestMatchers("/superuser/**").hasRole("SUPERUSER")
                 .requestMatchers("/doctor/**").hasAnyRole("ADMIN", "SUPERUSER", "DOCTOR")
                 .requestMatchers("/patient/**").hasAnyRole("ADMIN", "SUPERUSER", "DOCTOR")
                 .requestMatchers( "/template/{templateId}/webtemplate").hasAnyRole("ADMIN", "SUPERUSER")
                 .requestMatchers("/formtemplate/**").hasAnyRole("ADMIN", "SUPERUSER")
-                .requestMatchers("/template/**").hasAnyRole("ADMIN", "SUPERUSER")
-                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPERUSER")
+                .requestMatchers("/template/**").hasAnyRole("ADMIN", "SUPERUSER","DOCTOR") //TODO: Remove Doctor as soon as there are forms based on templates
+                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPERUSER","DOCTOR") //TODO: Remove Doctor as soon as there are forms based on templates
                 .requestMatchers(HttpMethod.POST, "/ehr/composition").hasAnyRole("DOCTOR", "ADMIN", "SUPERUSER")
                 .requestMatchers(HttpMethod.DELETE, "/doctor/**", "/patient/**").hasAnyRole("ADMIN", "SUPERUSER")
                 .requestMatchers("/public/**", "/login").permitAll()
