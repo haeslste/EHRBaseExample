@@ -66,6 +66,12 @@ public class DataInitializer implements CommandLineRunner {
             // Doctors (user1 - user5)
             List<Doctor> allDoctors = new ArrayList<Doctor>();
             List<Patient> allPatients = new ArrayList<Patient>();
+            List<String> firstNames = List.of("John", "Jane", "Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Hannah", 
+                    "Ivy", "Jack", "Kathy", "Leo", "Mia", "Nina", "Oscar", "Paul", "Quinn", "Rita");
+            List<String> lastNames = List.of("Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor", 
+                    "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Garcia", "Martinez", "Robinson");
+            List<String> specialities = List.of("Cardiology", "Dermatology", "Neurology", "Pediatrics", "Radiology", 
+                    "General Practice", "Orthopedics", "Psychiatry", "Ophthalmology", "Gastroenterology");
             for (int i = 1; i <= 5; i++) {
                 String username = "user" + i;
                 String password = "password";
@@ -78,9 +84,9 @@ public class DataInitializer implements CommandLineRunner {
                     User savedUser = userRepository.save(user); // save and get managed instance
 
                     Doctor doctor = Doctor.builder()
-                            .firstName("DoctorFirst" + i)
-                            .lastName("DoctorLast" + i)
-                            .speciality("Speciality" + i)
+                            .firstName(firstNames.get(i))
+                            .lastName(lastNames.get(i))
+                            .speciality(specialities.get(i))
                             .user(savedUser)
                             .build();
                     doctorRepository.save(doctor);
@@ -102,8 +108,8 @@ public class DataInitializer implements CommandLineRunner {
                     User savedUser = userRepository.save(user); // save and get managed instance
 
                     Patient patient = Patient.builder()
-                            .firstName("PatientFirst" + i)
-                            .lastName("PatientLast" + i)
+                            .firstName(firstNames.get(i))
+                            .lastName(lastNames.get(i))
                             .dateOfBirth("1990-01-" + String.format("%02d", i))
                             .user(savedUser)
                             .build();
