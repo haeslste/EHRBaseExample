@@ -1,6 +1,7 @@
 "use client";
 import { FC, useState, useEffect } from 'react';
-import {fetchPatients} from "@/services/patients_service";
+import {fetchPatients, fetchPatientsOfDoctor} from "@/services/patients_service";
+import {fetchMyDoctorProfile} from "@/services/doctors_service";
 import { UserList } from './userList';
 
 interface UserData {
@@ -17,13 +18,17 @@ interface UserData {
 const AdminDashboard: React.FC = () => {
   const [users, setUsers] = useState([{}]);
   const [patients, setPatients] = useState([]);
+  const [myDoctorProfile, setMyDoctorProfile] = useState(null);
 
   const fetchData = async () => {
-    const patients = await fetchPatients();
+    const myDoctorProfile = await fetchMyDoctorProfile();
+    setMyDoctorProfile(myDoctorProfile);
+    const doctorId = myDoctorProfile.id;
+    const patients = await fetchPatientsOfDoctor(doctorId);
     setPatients(patients);
 
     const mappedPatients = patients.map((patient:UserData) => ({
-      id: patient.user.id,
+      id: patient.id,
       name: `${patient.firstName}`,
       lastName: `${patient.lastName}`,
       username: patient.user.username,
@@ -33,6 +38,7 @@ const AdminDashboard: React.FC = () => {
     const allUsers = [ ...mappedPatients];
     setUsers(allUsers);
     setPatients(mappedPatients);
+    console.log("Patients: ", patients);
   }
  
   useEffect(() => {

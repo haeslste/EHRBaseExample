@@ -4,6 +4,7 @@ import { DashboardStatCard } from '@/components/cards/DashboardStatCard';
 import {fetchDoctors} from "@/services/doctors_service";
 import {fetchPatients} from "@/services/patients_service";
 import { fetchTemplates } from '@/services/template_service';
+import { fetchMyDoctorProfile } from '../services/doctors_service';
 
 interface UserData {
   id: string;
@@ -15,7 +16,6 @@ interface UserData {
     username:string;
   }
 }
-
 const DoctorDashboard: React.FC = () => {
   const [users, setUsers] = useState([{}]);
   const [templates, setTemplates] = useState([{}]);
@@ -23,14 +23,11 @@ const DoctorDashboard: React.FC = () => {
   const [compositions, setCompositions] = useState([]); 
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [myDoctorProfile, setMyDoctorProfile] = useState(null);
 
   const fetchData = async () => {
-    const doctors = await fetchDoctors();
-    const patients = await fetchPatients();
-    const templates = await fetchTemplates();
-    setDoctors(doctors);
-    setPatients(patients);
-    setTemplates(templates);
+    const myDoctorProfile = await fetchMyDoctorProfile();
+    setMyDoctorProfile(myDoctorProfile);
   }
  
   useEffect(() => {
