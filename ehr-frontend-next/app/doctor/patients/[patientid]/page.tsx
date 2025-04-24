@@ -101,7 +101,10 @@ export default function PatientDetailPage({
                     </div>
                 </Card>
             ) : (
+                <div className="mt-4">
+                
                 <Card>
+                <h2 className="text-xl font-semibold">Add New Health Record</h2>
                     <FormSelector
                         templates={templates as any[]} // You can strongly type it if needed
                         onSelect={(templateId) => {
@@ -109,17 +112,16 @@ export default function PatientDetailPage({
                             // You could also set it in state and render the form dynamically
                         }}
                         />
-                    <div className="mt-4">
-                        <h2 className="text-xl font-semibold">Add New Health Record</h2>
                         {/* Add your health record form here */}
-                        <button
+                            <button
                             className="text-white mt-4 px-4 py-2 bg-gray-500 rounded hover:bg-gray-600"
                             onClick={() => setAddingHealthRecord(false)}
                         >
                             Cancel
                         </button>
-                    </div>
+
                 </Card>
+                </div>
             )}
         </div>
     );
