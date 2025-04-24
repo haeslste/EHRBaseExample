@@ -30,6 +30,8 @@ export default function PatientDetailPage({
 }) {
     const [patient, setPatient] = useState<PatientProfileData | null>(null);
     const [addingHealthRecord, setAddingHealthRecord] = useState(false);
+    const [formSelected, setFormSelected] = useState(false);
+    const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [templates, setTemplates] = useState([{}]);
 
     useEffect(() => {
@@ -59,6 +61,12 @@ export default function PatientDetailPage({
 
     if (!patient) {
         return <div className="p-6">Loading...</div>;
+    }
+
+    const resetHealthRecordAddition = () => {
+        setAddingHealthRecord(false);
+        setFormSelected(false);
+        setSelectedTemplate(null);
     }
 
     const onCreateNewRecord = () => {
@@ -115,7 +123,7 @@ export default function PatientDetailPage({
                         {/* Add your health record form here */}
                             <button
                             className="text-white mt-4 px-4 py-2 bg-gray-500 rounded hover:bg-gray-600"
-                            onClick={() => setAddingHealthRecord(false)}
+                            onClick={resetHealthRecordAddition}
                         >
                             Cancel
                         </button>
