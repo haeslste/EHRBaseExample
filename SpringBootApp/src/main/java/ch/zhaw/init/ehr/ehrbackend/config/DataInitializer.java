@@ -7,6 +7,7 @@ import jakarta.annotation.PostConstruct;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ public class DataInitializer implements CommandLineRunner {
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PatientService patientService;
 
     @Value("${default.user.username:user}")
     private String defaultUserUsername;
@@ -44,11 +46,12 @@ public class DataInitializer implements CommandLineRunner {
     private String defaultSuperuserPassword;
 
     public DataInitializer(UserRepository userRepository, DoctorRepository doctorRepository,
-                           PatientRepository patientRepository, PasswordEncoder passwordEncoder) {
+                           PatientRepository patientRepository, PasswordEncoder passwordEncoder, PatientService patientService) {
         this.userRepository = userRepository;
         this.doctorRepository = doctorRepository;
         this.patientRepository = patientRepository;
         this.passwordEncoder = passwordEncoder;
+        this.patientService = patientService;
         logger.info("✅✅✅ DataInitializer CONSTRUCTOR CALLED");
     }
 
@@ -56,6 +59,8 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         try {
             logger.info("DataInitializer running...");
+
+            TimeUnit.SECONDS.sleep(10);
 
             // Core users
             createUserIfNotExists(defaultUserUsername, defaultUserPassword, UserRole.ROLE_STANDARDUSER);
@@ -114,6 +119,7 @@ public class DataInitializer implements CommandLineRunner {
                             .user(savedUser)
                             .build();
                     patientRepository.save(patient);
+                    patient = patientService.savePatient(patient); // Save the patient to the EHR system
                     allPatients.add(patient);
                     logger.info("Created patient user '{}' linked to patient '{} {}'", username, patient.getFirstName(), patient.getLastName());
                 }

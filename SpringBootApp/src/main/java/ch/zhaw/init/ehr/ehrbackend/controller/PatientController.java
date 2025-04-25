@@ -50,6 +50,7 @@ public class PatientController {
             patient.getFirstName(),
             patient.getLastName(),
             patient.getDateOfBirth(),
+            patient.getEhrId(),
             new UserDto(patient.getUser().getId(), patient.getUser().getUsername(), patient.getUser().getRole()),
             doctorDtos
         );

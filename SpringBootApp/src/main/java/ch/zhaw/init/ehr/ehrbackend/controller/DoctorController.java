@@ -57,6 +57,7 @@ public class DoctorController {
                     patient.getFirstName(),
                     patient.getLastName(),
                     patient.getDateOfBirth(),
+                    patient.getEhrId(),
                     new UserDto(patient.getUser().getId(), patient.getUser().getUsername(), patient.getUser().getRole()),
                     null // Avoid circular reference
                 )).toList();
@@ -75,6 +76,7 @@ public class DoctorController {
         patient.getFirstName(),
         patient.getLastName(),
         patient.getDateOfBirth(),
+        patient.getEhrId(),
         new UserDto(patient.getUser().getId(), patient.getUser().getUsername(), patient.getUser().getRole()),
         null // Avoid circular reference
         )).toList();
