@@ -22,7 +22,7 @@ public class PatientService {
     private final PatientRepository patientRepository;
     public Patient savePatient(Patient patient) {
         Patient saved = patientRepository.save(patient);
- 
+        //TODO: extract the string to config
         URI baseUri = URI.create("http://ehrbase-server:8080/ehrbase/");
         OpenEhrClientConfig config = new OpenEhrClientConfig(baseUri);
         OpenEhrClient openEhrClient = new DefaultRestClient(config);
