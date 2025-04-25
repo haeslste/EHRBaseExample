@@ -8,6 +8,7 @@ interface User {
   name: string;
   lastName: string;
   username: string;
+  ehrId: string;
   role: string;
 }
 
@@ -34,6 +35,7 @@ export const UserList: FC<UserListProps> = ({ users, linkableUsers, title, setUs
         { key: 'name', label: 'Name' },
         { key: 'lastName', label: 'Last Name' },
         { key: 'username', label: 'Username' },
+        { key: 'ehrId', label: 'EHR ID' },
         { key: 'role', label: 'Role' },
         {
           key: 'actions',

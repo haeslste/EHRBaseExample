@@ -10,6 +10,7 @@ interface UserData {
   lastName: string;
   username: string;
   role: string;
+  ehrId: string;
   user: { id: string; 
     username:string;
   }
@@ -32,6 +33,7 @@ const AdminDashboard: React.FC = () => {
       name: `${patient.firstName}`,
       lastName: `${patient.lastName}`,
       username: patient.user.username,
+      ehrId: patient.ehrId,
       role: 'Patient',
     }));
     
