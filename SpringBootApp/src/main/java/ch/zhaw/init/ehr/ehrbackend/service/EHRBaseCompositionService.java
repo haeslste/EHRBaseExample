@@ -63,7 +63,7 @@ public class EHRBaseCompositionService extends EHRBaseService {
             throw new RuntimeException("Failed to find composition: " + e.getMessage(), e);
         }
     }
-    
+
 
     public Optional<Composition> findRaw(UUID compositionId, UUID ehrId) {
         try {
@@ -82,8 +82,4 @@ public class EHRBaseCompositionService extends EHRBaseService {
             throw new RuntimeException("Failed to delete composition: " + e.getMessage(), e);
         }
     }
-
-
-
-    
 }
