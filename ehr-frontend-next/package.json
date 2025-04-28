@@ -27,6 +27,7 @@
     "axios": "^1.8.4",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
+    "medblocks-ui": "^0.0.215",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

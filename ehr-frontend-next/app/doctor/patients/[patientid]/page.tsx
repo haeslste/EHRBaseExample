@@ -6,40 +6,40 @@ import { fetchTemplates } from "@/services/template_service";
 import { Card } from "@/components/cards/Card";
 import FormSelector from "@/components/FormSelector";
 import TemplateFormRenderer from "@/components/TemplateFormRenderer";
-
+import MedblocksFormRenderer from "@/components/MedblocksFormRenderer";
 export default function PatientDetailPage() {
-  const { patientid } = useParams();
-  const patientId = patientid as string;
+    const { patientid } = useParams();
+    const patientId = patientid as string;
 
-  const [patient, setPatient] = useState<PatientProfileData | null>(null);
-  const [addingHealthRecord, setAddingHealthRecord] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
-  const [templates, setTemplates] = useState<any[]>([]);
+    const [patient, setPatient] = useState<PatientProfileData | null>(null);
+    const [addingHealthRecord, setAddingHealthRecord] = useState(false);
+    const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+    const [templates, setTemplates] = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchPatientData = async () => {
-      try {
-        const patientData = await fetchPatientById(patientId);
-        setPatient(patientData);
-      } catch (error) {
-        console.error("Error fetching patient:", error);
-      }
-    };
+    useEffect(() => {
+        const fetchPatientData = async () => {
+            try {
+                const patientData = await fetchPatientById(patientId);
+                setPatient(patientData);
+            } catch (error) {
+                console.error("Error fetching patient:", error);
+            }
+        };
 
-    const fetchTemplateData = async () => {
-      try {
-        const templates = await fetchTemplates();
-        setTemplates(templates);
-      } catch (error) {
-        console.error("Error fetching templates:", error);
-      }
-    };
+        const fetchTemplateData = async () => {
+            try {
+                const templates = await fetchTemplates();
+                setTemplates(templates);
+            } catch (error) {
+                console.error("Error fetching templates:", error);
+            }
+        };
 
-    if (patientId) {
-      fetchPatientData();
-      fetchTemplateData();
-    }
-  }, [patientId]);
+        if (patientId) {
+            fetchPatientData();
+            fetchTemplateData();
+        }
+    }, [patientId]);
 
     const resetHealthRecordAddition = () => {
         setAddingHealthRecord(false);
@@ -109,14 +109,14 @@ export default function PatientDetailPage() {
 
                         {/* Step 2: Render form after selection */}
                         {selectedTemplate && (
-                             <TemplateFormRenderer
-                             templateId={selectedTemplate.templateId}
-                             ehrId={patient.ehrId} // make sure this is available in patient data
-                             onSuccess={(data) => {
-                               console.log("Composition submitted:", data);
-                               resetHealthRecordAddition();
-                             }}
-                           />
+                            <MedblocksFormRenderer
+                                templateId={selectedTemplate.templateId}
+                                ehrId={patient.ehrId} // make sure this is available in patient data
+                                onSuccess={(data) => {
+                                    console.log("Composition submitted:", data);
+                                    resetHealthRecordAddition();
+                                }}
+                            />
                         )}
 
                         {/* Cancel button */}
