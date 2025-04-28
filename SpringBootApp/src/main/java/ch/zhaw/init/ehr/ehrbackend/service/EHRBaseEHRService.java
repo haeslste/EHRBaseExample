@@ -10,10 +10,19 @@ import org.ehrbase.openehr.sdk.client.openehrclient.OpenEhrClientConfig;
 import org.ehrbase.openehr.sdk.client.openehrclient.defaultrestclient.DefaultRestClient;
 import org.ehrbase.openehr.sdk.util.exception.ClientException;
 import org.ehrbase.openehr.sdk.util.exception.WrongStatusCodeException;
+
+import com.nedap.archie.rm.ehr.Ehr;
 import com.nedap.archie.rm.ehr.EhrStatus;
 
 
 public class EHRBaseEHRService extends EHRBaseService  {
+
+    private EhrEndpoint createEhrEndpoint() {
+        URI baseUri = URI.create("http://ehrbase-server:8080/ehrbase/");
+        OpenEhrClientConfig config = new OpenEhrClientConfig(baseUri);
+        OpenEhrClient openEhrClient = new DefaultRestClient(config);
+        return openEhrClient.ehrEndpoint();
+    }
     /**
      * Create a new EHR.
      *
@@ -23,10 +32,7 @@ public class EHRBaseEHRService extends EHRBaseService  {
      */
     public UUID createEHR() {
         try{
-            URI baseUri = URI.create("http://ehrbase-server:8080/ehrbase/");
-            OpenEhrClientConfig config = new OpenEhrClientConfig(baseUri);
-            OpenEhrClient openEhrClient = new DefaultRestClient(config);
-            EhrEndpoint ehrEndpoint = openEhrClient.ehrEndpoint();
+            EhrEndpoint ehrEndpoint = createEhrEndpoint();
             UUID ehrId = ehrEndpoint.createEhr();
             return ehrId;
         }catch (Exception e) {
@@ -43,10 +49,7 @@ public class EHRBaseEHRService extends EHRBaseService  {
      */
     public UUID createEHR(EhrStatus ehrStatus){
         try{
-            URI baseUri = URI.create("http://ehrbase-server:8080/ehrbase/");
-            OpenEhrClientConfig config = new OpenEhrClientConfig(baseUri);
-            OpenEhrClient openEhrClient = new DefaultRestClient(config);
-            EhrEndpoint ehrEndpoint = openEhrClient.ehrEndpoint();
+            EhrEndpoint ehrEndpoint = createEhrEndpoint();
             UUID ehrId = ehrEndpoint.createEhr(ehrStatus);
             return ehrId;
         }catch (Exception e) {
@@ -64,10 +67,7 @@ public class EHRBaseEHRService extends EHRBaseService  {
      */
     public Optional<EhrStatus> getEhrStatus(UUID ehrID) {
         try {
-            URI baseUri = URI.create("http://ehrbase-server:8080/ehrbase/");
-            OpenEhrClientConfig config = new OpenEhrClientConfig(baseUri);
-            OpenEhrClient openEhrClient = new DefaultRestClient(config);
-            EhrEndpoint ehrEndpoint = openEhrClient.ehrEndpoint();
+            EhrEndpoint ehrEndpoint = createEhrEndpoint();
             return ehrEndpoint.getEhrStatus(ehrID);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get EHR status: " + e.getMessage());
@@ -83,10 +83,7 @@ public class EHRBaseEHRService extends EHRBaseService  {
      */
     public void updateEhrStatus(UUID ehrID, EhrStatus ehrStatus) {
         try {
-            URI baseUri = URI.create("http://ehrbase-server:8080/ehrbase/");
-            OpenEhrClientConfig config = new OpenEhrClientConfig(baseUri);
-            OpenEhrClient openEhrClient = new DefaultRestClient(config);
-            EhrEndpoint ehrEndpoint = openEhrClient.ehrEndpoint();
+            EhrEndpoint ehrEndpoint = createEhrEndpoint();
             ehrEndpoint.updateEhrStatus(ehrID, ehrStatus);
         } catch (Exception e) {
             throw new RuntimeException("Failed to update EHR status: " + e.getMessage());
