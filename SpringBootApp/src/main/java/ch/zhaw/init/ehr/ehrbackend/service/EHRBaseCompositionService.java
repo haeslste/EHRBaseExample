@@ -45,7 +45,7 @@ public class EHRBaseCompositionService extends EHRBaseService {
         }
     }
     
-    ObjectVersionId mergeRaw(Composition composition, UUID ehrId) {
+    public ObjectVersionId mergeRaw(Composition composition, UUID ehrId) {
         try {
             CompositionEndpoint compositionEndpoint = createCompositionEndpoint(ehrId);
             ObjectVersionId objectVersionId = compositionEndpoint.mergeRaw(composition);
@@ -82,4 +82,4 @@ public class EHRBaseCompositionService extends EHRBaseService {
             throw new RuntimeException("Failed to delete composition: " + e.getMessage(), e);
         }
     }
-}
+} 

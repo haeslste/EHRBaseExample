@@ -1,11 +1,12 @@
 package ch.zhaw.init.ehr.ehrbackend.dto;
 
+import com.nedap.archie.rm.composition.Composition;
 import lombok.Data;
-import java.util.Map;
+
+import java.util.UUID;
 
 @Data
 public class CompositionSubmissionRequest {
-    private String ehrId;           // EHRbase patient ID
-    private String templateId;      // e.g., "body_weight"
-    private Map<String, Object> compositionJson; // JSON  (matching WebTemplate)
+    private UUID ehrId;
+    private Composition composition;
 }
